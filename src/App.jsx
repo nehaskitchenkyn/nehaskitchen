@@ -3,8 +3,25 @@ import {
   ShoppingBag, Calendar, CheckCircle2, Phone, Clock, Plus, 
   Trash2, ShieldCheck, TrendingUp, DollarSign, Package, 
   ChefHat, ChevronRight, FileSpreadsheet, Eye, Printer, 
-  MessageCircle, Sparkles, Filter, Search, Instagram, Store, Utensils
+  MessageCircle, Sparkles, Filter, Search, Store, Utensils 
 } from 'lucide-react';
+
+// Custom inline Instagram icon component (replaces deprecated lucide export)
+const InstagramIcon = ({ className = "w-4 h-4 text-pink-300" }) => (
+  <svg 
+    className={className} 
+    viewBox="0 0 24 24" 
+    fill="none" 
+    stroke="currentColor" 
+    strokeWidth="2" 
+    strokeLinecap="round" 
+    strokeLinejoin="round"
+  >
+    <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
+    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+    <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
+  </svg>
+);
 
 const MENU_DATA = [
   // Snacks
@@ -73,6 +90,41 @@ const INITIAL_ORDERS = [
       { name: 'Kande Pohe', rate: 40, qty: 2, subtotal: 80 }
     ],
     total: 520
+  },
+  {
+    id: 'ORD-7080',
+    customerName: 'Sunita Deshmukh',
+    phone: '9869445566',
+    date: '2026-11-06',
+    timeSlot: '04:00 PM - 5:00 PM',
+    status: 'Ready',
+    paymentMode: 'Cash',
+    address: 'Row House 12, Gandhar Nagar, Kalyan',
+    type: 'Phone/Manual',
+    notes: 'Diwali Faral advance box delivery.',
+    items: [
+      { name: 'Besan Ladoo (500g)', rate: 300, qty: 2, subtotal: 600 },
+      { name: 'Chakali (500g)', rate: 240, qty: 2, subtotal: 480 },
+      { name: 'Karanji (500g)', rate: 320, qty: 1, subtotal: 320 }
+    ],
+    total: 1400
+  },
+  {
+    id: 'ORD-7075',
+    customerName: 'Pooja Patil',
+    phone: '9920887766',
+    date: '2026-10-24',
+    timeSlot: '7:30 PM - 8:00 PM',
+    status: 'Completed',
+    paymentMode: 'UPI',
+    address: 'Flat 604, Nilkanth Palms, Kalyan West',
+    type: 'Storefront',
+    notes: 'Roti with ghee, extra papad packed.',
+    items: [
+      { name: 'Veg Thali', rate: 150, qty: 3, subtotal: 450, variant: '2 Roti' },
+      { name: 'Misal Pav', rate: 80, qty: 2, subtotal: 160 }
+    ],
+    total: 610
   }
 ];
 
@@ -301,6 +353,7 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-amber-50/40 text-stone-800 flex flex-col font-sans">
+      {/* Top Header */}
       <header className="bg-amber-900 text-amber-50 sticky top-0 z-40 shadow-md">
         <div className="max-w-6xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-3 cursor-pointer" onClick={() => setActiveTab('store')}>
@@ -322,7 +375,7 @@ export default function App() {
               <span>7021424410</span>
             </a>
             <a href="https://instagram.com/nehas.kitchen.kyn" target="_blank" rel="noreferrer" className="flex items-center gap-1.5 bg-amber-800/80 hover:bg-amber-800 px-3 py-1.5 rounded-lg border border-amber-700/60 transition">
-              <Instagram className="w-4 h-4 text-pink-300" />
+              <InstagramIcon className="w-4 h-4 text-pink-300" />
               <span className="hidden sm:inline">@nehas.kitchen.kyn</span>
             </a>
             <button 
@@ -336,6 +389,7 @@ export default function App() {
         </div>
       </header>
 
+      {/* Main Content */}
       {activeTab === 'store' ? (
         <main className="flex-1 max-w-6xl w-full mx-auto px-4 py-6">
           <div className="bg-gradient-to-r from-amber-700 to-amber-900 text-white rounded-2xl p-6 md:p-8 mb-8 shadow-lg flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
@@ -350,11 +404,12 @@ export default function App() {
             </div>
             <div className="bg-white/10 backdrop-blur-md p-4 rounded-xl border border-white/20 text-xs space-y-1.5 w-full md:w-auto">
               <div className="flex items-center gap-2"><Phone className="w-4 h-4 text-amber-300" /> Orders: <strong>+91 70214 24410</strong></div>
-              <div className="flex items-center gap-2"><Instagram className="w-4 h-4 text-pink-300" /> Insta: <strong>@nehas.kitchen.kyn</strong></div>
+              <div className="flex items-center gap-2"><InstagramIcon className="w-4 h-4 text-pink-300" /> Insta: <strong>@nehas.kitchen.kyn</strong></div>
               <div className="flex items-center gap-2"><Clock className="w-4 h-4 text-amber-300" /> Pre-order available for lunch & dinner</div>
             </div>
           </div>
 
+          {/* Categorized Menu */}
           <div className="space-y-10">
             {['Snacks', 'Diwali Snacks', 'Lunch And Dinner'].map((category) => {
               const items = MENU_DATA.filter(i => i.category === category);
@@ -433,6 +488,7 @@ export default function App() {
           </div>
         </main>
       ) : (
+        /* Admin Dashboard */
         <main className="flex-1 max-w-6xl w-full mx-auto px-4 py-6">
           {!isAdminAuthenticated ? (
             <div className="max-w-md mx-auto bg-white p-6 md:p-8 rounded-2xl shadow-md border border-amber-200 text-center">
@@ -490,6 +546,7 @@ export default function App() {
                 </button>
               </div>
 
+              {/* Monthly Sell Dashboard */}
               {adminTab === 'analytics' && (
                 <div className="space-y-6">
                   <div className="flex flex-wrap items-center justify-between gap-4 bg-white p-4 rounded-xl border border-amber-200 shadow-sm">
@@ -592,6 +649,7 @@ export default function App() {
                 </div>
               )}
 
+              {/* Offline Manual POS */}
               {adminTab === 'offline' && (
                 <div className="bg-white p-6 rounded-xl border border-stone-200 shadow-sm max-w-2xl mx-auto">
                   <h3 className="text-lg font-bold text-amber-950 mb-1">Add Offline / Phone Order</h3>
@@ -735,6 +793,7 @@ export default function App() {
                 </div>
               )}
 
+              {/* Live Orders View */}
               {adminTab === 'orders' && (
                 <div className="space-y-4">
                   <h3 className="font-bold text-lg text-amber-950">Active Kitchen Orders</h3>
@@ -812,6 +871,7 @@ export default function App() {
         </main>
       )}
 
+      {/* Cart Drawer */}
       {cartOpen && (
         <div className="fixed inset-0 z-50 flex justify-end bg-black/40 backdrop-blur-xs">
           <div className="bg-white w-full max-w-md h-full flex flex-col p-5 shadow-2xl">
@@ -910,6 +970,7 @@ export default function App() {
         </div>
       )}
 
+      {/* Floating Cart Pill */}
       {cart.length > 0 && !cartOpen && (
         <button
           onClick={() => setCartOpen(true)}
@@ -920,6 +981,7 @@ export default function App() {
         </button>
       )}
 
+      {/* Adhoc Inquiry Modal */}
       {adhocModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl">
@@ -1005,6 +1067,7 @@ export default function App() {
         </div>
       )}
 
+      {/* Printable KOT Modal */}
       {selectedKOTOrder && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <div className="bg-white rounded-xl max-w-sm w-full p-6 shadow-2xl font-mono text-xs">
@@ -1046,6 +1109,7 @@ export default function App() {
         </div>
       )}
 
+      {/* Footer */}
       <footer className="bg-amber-950 text-amber-200/80 text-xs py-6 mt-12 border-t border-amber-900">
         <div className="max-w-6xl mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-4 text-center md:text-left">
           <div>
@@ -1057,7 +1121,7 @@ export default function App() {
               <Phone className="w-3.5 h-3.5" /> 7021424410
             </a>
             <a href="https://instagram.com/nehas.kitchen.kyn" target="_blank" rel="noreferrer" className="hover:text-white flex items-center gap-1">
-              <Instagram className="w-3.5 h-3.5" /> @nehas.kitchen.kyn
+              <InstagramIcon className="w-3.5 h-3.5" /> @nehas.kitchen.kyn
             </a>
           </div>
         </div>
