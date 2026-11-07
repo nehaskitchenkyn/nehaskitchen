@@ -22,6 +22,8 @@ Without Firebase configuration, the storefront remains available but admin sign-
 
 Admin orders are currently stored in each browser's local storage; Google sign-in does not sync orders between devices. If order data is moved to a backend, authorize these same accounts in backend security rules as well—client-side checks alone do not secure backend data.
 
+Menu photos are local illustrative images matched to each dish. Their creators, source pages, and licenses are listed in [the image credits](./src/assets/products/ATTRIBUTION.md).
+
 ## Scripts
 
 - `npm run dev` — start the local development server

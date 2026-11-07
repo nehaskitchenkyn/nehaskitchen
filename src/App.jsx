@@ -27,19 +27,19 @@ const InstagramIcon = ({ className = "w-4 h-4 text-pink-300" }) => (
 
 const MENU_DATA = [
   // Snacks
-  { id: 'snk-1', category: 'Snacks', name: 'Idli Chutney', price: 60, unit: 'per plate (2 pcs)', type: 'Veg', desc: 'Steaming hot, fluffy rice-lentil cakes served with freshly grated coconut chutney and aromatic sambar.', image: 'photo-1601050690597-df0568f70950', popular: true },
-  { id: 'snk-2', category: 'Snacks', name: 'Kande Pohe', price: 40, unit: 'per plate', type: 'Veg', desc: 'Traditional Maharashtrian flattened rice cooked with onions, mustard seeds, green chillies, peanuts, and lemon juice.', image: 'photo-1504674900247-0877df9cc836', popular: true },
-  { id: 'snk-3', category: 'Snacks', name: 'Misal Pav', price: 80, unit: 'per plate (with 2 pav)', type: 'Veg', desc: 'Fiery sprouted moth bean gravy topped with crispy farsan, chopped onions, coriander, and fresh lemon with buttered pav.', image: 'photo-1631452180519-c014fe946bc7', popular: true },
-  { id: 'snk-4', category: 'Snacks', name: 'Upma', price: 40, unit: 'per plate', type: 'Veg', desc: 'Wholesome semolina tempered with mustard seeds, curry leaves, ginger, green chillies, and roasted cashews.', image: 'photo-1547592180-85f173990554' },
+  { id: 'snk-1', category: 'Snacks', name: 'Idli Chutney', price: 60, unit: 'per plate (2 pcs)', type: 'Veg', desc: 'Steaming hot, fluffy rice-lentil cakes served with freshly grated coconut chutney and aromatic sambar.', image: new URL('./assets/products/idli.jpg', import.meta.url).href, popular: true },
+  { id: 'snk-2', category: 'Snacks', name: 'Kande Pohe', price: 40, unit: 'per plate', type: 'Veg', desc: 'Traditional Maharashtrian flattened rice cooked with onions, mustard seeds, green chillies, peanuts, and lemon juice.', image: new URL('./assets/products/kande-pohe.jpg', import.meta.url).href, popular: true },
+  { id: 'snk-3', category: 'Snacks', name: 'Misal Pav', price: 80, unit: 'per plate (with 2 pav)', type: 'Veg', desc: 'Fiery sprouted moth bean gravy topped with crispy farsan, chopped onions, coriander, and fresh lemon with buttered pav.', image: new URL('./assets/products/misal-pav.jpg', import.meta.url).href, popular: true },
+  { id: 'snk-4', category: 'Snacks', name: 'Upma', price: 40, unit: 'per plate', type: 'Veg', desc: 'Wholesome semolina tempered with mustard seeds, curry leaves, ginger, green chillies, and roasted cashews.', image: new URL('./assets/products/upma.jpg', import.meta.url).href },
 
   // Diwali Snacks (Faral)
-  { id: 'dwl-1', category: 'Diwali Snacks', name: 'Besan Ladoo', price: 300, unit: 'per 500g', type: 'Veg', desc: 'Pure ghee roasted gram flour delicately sweetened and infused with cardamom and crunchy dry fruits.', image: 'photo-1504674900247-0877df9cc836', popular: true },
-  { id: 'dwl-2', category: 'Diwali Snacks', name: 'Rava Ladoo', price: 280, unit: 'per 500g', type: 'Veg', desc: 'Melt-in-mouth semolina and coconut ladoos prepared in pure cow ghee with golden raisins and cashew bits.', image: 'photo-1546069901-ba9599a7e63c' },
-  { id: 'dwl-3', category: 'Diwali Snacks', name: 'Chakali', price: 240, unit: 'per 500g', type: 'Veg', desc: 'Crispy, spiral savoury made from roasted multi-grain bhajani flour and aromatic spices.', image: 'photo-1601050690597-df0568f70950', popular: true },
-  { id: 'dwl-4', category: 'Diwali Snacks', name: 'Shankarpalli', price: 220, unit: 'per 500g', type: 'Veg', desc: 'Crispy, diamond-cut sweet festive bites fried to golden perfection in pure ghee.', image: 'photo-1504674900247-0877df9cc836' },
-  { id: 'dwl-5', category: 'Diwali Snacks', name: 'Karanji', price: 320, unit: 'per 500g', type: 'Veg', desc: 'Flaky crescent pastries stuffed with roasted dry coconut, khoya, poppy seeds, and fragrant spices.', image: 'photo-1601050690597-df0568f70950', popular: true },
-  { id: 'dwl-6', category: 'Diwali Snacks', name: 'Chivada', price: 220, unit: 'per 500g', type: 'Veg', desc: 'Crisp roasted poha chivda lightly seasoned with mustard, turmeric, peanuts, curry leaves, and green chillies.', image: 'photo-1547592180-85f173990554' },
-  { id: 'dwl-7', category: 'Diwali Snacks', name: 'Tikhat Shev', price: 200, unit: 'per 500g', type: 'Veg', desc: 'Crunchy gram flour spicy sev infused with garlic, ajwain, and special home ground spices.', image: 'photo-1547592180-85f173990554' },
+  { id: 'dwl-1', category: 'Diwali Snacks', name: 'Besan Ladoo', price: 300, unit: 'per 500g', type: 'Veg', desc: 'Pure ghee roasted gram flour delicately sweetened and infused with cardamom and crunchy dry fruits.', image: new URL('./assets/products/besan-ladoo.jpg', import.meta.url).href, popular: true },
+  { id: 'dwl-2', category: 'Diwali Snacks', name: 'Rava Ladoo', price: 280, unit: 'per 500g', type: 'Veg', desc: 'Melt-in-mouth semolina and coconut ladoos prepared in pure cow ghee with golden raisins and cashew bits.', image: new URL('./assets/products/rava-ladoo.jpg', import.meta.url).href },
+  { id: 'dwl-3', category: 'Diwali Snacks', name: 'Chakali', price: 240, unit: 'per 500g', type: 'Veg', desc: 'Crispy, spiral savoury made from roasted multi-grain bhajani flour and aromatic spices.', image: new URL('./assets/products/chakali.jpg', import.meta.url).href, popular: true },
+  { id: 'dwl-4', category: 'Diwali Snacks', name: 'Shankarpalli', price: 220, unit: 'per 500g', type: 'Veg', desc: 'Crispy, diamond-cut sweet festive bites fried to golden perfection in pure ghee.', image: new URL('./assets/products/shankarpalli.jpg', import.meta.url).href },
+  { id: 'dwl-5', category: 'Diwali Snacks', name: 'Karanji', price: 320, unit: 'per 500g', type: 'Veg', desc: 'Flaky crescent pastries stuffed with roasted dry coconut, khoya, poppy seeds, and fragrant spices.', image: new URL('./assets/products/karanji.jpg', import.meta.url).href, popular: true },
+  { id: 'dwl-6', category: 'Diwali Snacks', name: 'Chivada', price: 220, unit: 'per 500g', type: 'Veg', desc: 'Crisp roasted poha chivda lightly seasoned with mustard, turmeric, peanuts, curry leaves, and green chillies.', image: new URL('./assets/products/chivada.jpg', import.meta.url).href },
+  { id: 'dwl-7', category: 'Diwali Snacks', name: 'Tikhat Shev', price: 200, unit: 'per 500g', type: 'Veg', desc: 'Crunchy gram flour spicy sev infused with garlic, ajwain, and special home ground spices.', image: new URL('./assets/products/tikhat-shev.jpg', import.meta.url).href },
 
   // Lunch & Dinner
   { 
@@ -50,7 +50,7 @@ const MENU_DATA = [
     unit: 'per thali', 
     type: 'Veg', 
     desc: 'Wholesome homestyle meal: Choice of 2 Roti or 1 Bhakri, Seasonal Bhaji, Steamed Rice, Homestyle Dal, Fresh Salad, and Crispy Papad.',
-    image: 'photo-1631452180519-c014fe946bc7',
+    image: new URL('./assets/products/veg-thali.jpg', import.meta.url).href,
     hasBreadChoice: true,
     popular: true
   },
@@ -62,7 +62,7 @@ const MENU_DATA = [
     unit: 'per thali', 
     type: 'Non-Veg', 
     desc: 'Hearty feast: Choice of 2 Roti or 1 Bhakri, Authentic Chicken Rassa (Tambda/Special Gravy), Steamed Rice, Fresh Salad, and Crispy Papad.',
-    image: 'photo-1603894584373-5ac82b2ae398',
+    image: new URL('./assets/products/nonveg-thali.jpg', import.meta.url).href,
     hasBreadChoice: true,
     popular: true
   },
@@ -74,7 +74,6 @@ const MENU_DATA = [
     unit: 'custom pricing', 
     type: 'Special', 
     desc: 'Planning a party, bulk gathering, or special dish not on the regular menu? Submit your requirements and Neha will personally call back with custom pricing.',
-    image: 'photo-1504674900247-0877df9cc836'
   }
 ];
 
@@ -485,17 +484,23 @@ export default function App() {
                     {items.map((item) => (
                       <div key={item.id} className="bg-white rounded-xl shadow-sm border border-amber-100 p-5 flex flex-col justify-between hover:shadow-md transition">
                         <div>
-                          <div className="relative -mx-5 -mt-5 mb-4 overflow-hidden rounded-t-xl bg-amber-100">
-                            <img
-                              src={`https://images.unsplash.com/${item.image}?auto=format&fit=crop&w=900&q=80`}
-                              alt={`${item.name} serving suggestion`}
-                              loading="lazy"
-                              className="h-48 w-full object-cover"
-                            />
-                            <span className="absolute bottom-2 right-2 rounded-full bg-stone-950/70 px-2.5 py-1 text-[10px] font-medium text-white">
-                              Serving suggestion
-                            </span>
-                          </div>
+                          {item.image ? (
+                            <div className="relative -mx-5 -mt-5 mb-4 overflow-hidden rounded-t-xl bg-amber-100">
+                              <img
+                                src={item.image}
+                                alt={`Illustrative photo of ${item.name}`}
+                                loading="lazy"
+                                className="h-48 w-full object-cover"
+                              />
+                              <span className="absolute bottom-2 right-2 rounded-full bg-stone-950/70 px-2.5 py-1 text-[10px] font-medium text-white">
+                                Illustrative photo
+                              </span>
+                            </div>
+                          ) : (
+                            <div className="-mx-5 -mt-5 mb-4 flex h-48 items-center justify-center rounded-t-xl bg-amber-100 text-amber-900">
+                              <span className="text-sm font-semibold">Your custom dish</span>
+                            </div>
+                          )}
                           <div className="flex justify-between items-start gap-2 mb-1.5">
                             <h4 className="font-bold text-stone-900 text-base md:text-lg">{item.name}</h4>
                             <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
