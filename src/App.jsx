@@ -3,7 +3,7 @@ import {
   ShoppingBag, Calendar, CheckCircle2, Phone, Clock, Plus, 
   Trash2, ShieldCheck, TrendingUp, DollarSign, Package, 
   ChefHat, ChevronRight, FileSpreadsheet, Eye, Printer, 
-  MessageCircle, Sparkles, Filter, Search, Store, Utensils, LogIn, LogOut
+  MessageCircle, Sparkles, Search, Store, Utensils, LogIn, LogOut
 } from 'lucide-react';
 import { onAuthStateChanged, signInWithPopup, signOut } from 'firebase/auth';
 import { ADMIN_EMAILS, auth, googleProvider, isFirebaseConfigured } from './firebase.js';
@@ -150,6 +150,10 @@ export default function App() {
     notes: '',
     date: new Date().toISOString().split('T')[0]
   });
+  const [swaadPrompt, setSwaadPrompt] = useState('');
+  const [swaadMood, setSwaadMood] = useState('surprise');
+  const [swaadVegOnly, setSwaadVegOnly] = useState(false);
+  const [swaadBudget, setSwaadBudget] = useState('500');
 
   const [adhocModal, setAdhocModal] = useState(false);
   const [adhocDetails, setAdhocDetails] = useState({
@@ -271,6 +275,69 @@ export default function App() {
   };
 
   const cartTotal = useMemo(() => cart.reduce((acc, curr) => acc + (curr.price * curr.qty), 0), [cart]);
+
+  const swaadIntent = `${swaadMood} ${swaadPrompt.trim().toLowerCase()}`;
+  const swaadTargetCategory = /breakfast|snack|nashta|नाश्ता|pohe|idli|upma/.test(swaadIntent)
+    ? 'Snacks'
+    : /faral|diwali|festive|festival|फराळ|दिवाळी|ladoo|chakali/.test(swaadIntent)
+      ? 'Diwali Snacks'
+      : /thali|lunch|dinner|जेवण|थाळी|meal/.test(swaadIntent)
+        ? 'Lunch And Dinner'
+        : null;
+  const swaadRequestedBudget = swaadPrompt.match(/(?:under|below|budget(?: is)?|₹|rs\.?)\s*₹?\s*(\d{2,4})/i);
+  const swaadEffectiveBudget = Math.min(
+    Number(swaadBudget),
+    swaadRequestedBudget ? Number(swaadRequestedBudget[1]) : Infinity
+  );
+  const swaadWantsVeg = swaadVegOnly || /vegetarian|veg only|strictly veg|शाकाहारी|फक्त शाकाहारी/.test(swaadIntent);
+
+  const swaadMatches = useMemo(() => {
+    const prompt = swaadPrompt.trim().toLowerCase();
+    const spicyIntent = /spicy|spice|tikhat|तिखट|जळजळीत/.test(swaadIntent);
+    const menuItems = MENU_DATA.filter(item =>
+      item.price > 0 &&
+      item.id !== 'adhoc-order' &&
+      (!swaadWantsVeg || item.type === 'Veg')
+    );
+    const affordableItems = menuItems.filter(item => item.price <= swaadEffectiveBudget);
+    const categoryItems = swaadTargetCategory
+      ? menuItems.filter(item => item.category === swaadTargetCategory)
+      : [];
+    const affordableCategoryItems = affordableItems.filter(item => item.category === swaadTargetCategory);
+    const itemsToRank = swaadTargetCategory
+      ? affordableCategoryItems.length > 0
+        ? affordableCategoryItems
+        : categoryItems.length > 0
+          ? categoryItems
+          : affordableItems.length > 0
+            ? affordableItems
+            : menuItems
+      : affordableItems.length > 0 ? affordableItems : menuItems;
+
+    return itemsToRank
+      .map(item => {
+        const searchableText = `${item.name} ${item.category} ${item.desc}`.toLowerCase();
+        const matchedWords = prompt
+          .split(/\s+/)
+          .filter(word => word.length > 2 && searchableText.includes(word)).length;
+        const categoryScore = swaadTargetCategory === item.category ? 10 : 0;
+        const popularScore = item.popular ? 3 : 0;
+        const spicyScore = spicyIntent && /misal|tikhat|spicy|chilli/i.test(searchableText) ? 5 : 0;
+
+        return { item, score: matchedWords * 4 + categoryScore + popularScore + spicyScore };
+      })
+      .sort((a, b) => b.score - a.score || a.item.price - b.item.price)
+      .slice(0, 3)
+      .map(({ item }) => item);
+  }, [swaadEffectiveBudget, swaadIntent, swaadPrompt, swaadTargetCategory, swaadWantsVeg]);
+
+  const swaadBudgetMiss = !MENU_DATA.some(item =>
+    item.price > 0 &&
+    item.id !== 'adhoc-order' &&
+    item.price <= swaadEffectiveBudget &&
+    (!swaadWantsVeg || item.type === 'Veg') &&
+    (!swaadTargetCategory || item.category === swaadTargetCategory)
+  );
 
   const handlePlaceOrder = (e) => {
     e.preventDefault();
@@ -409,7 +476,7 @@ export default function App() {
   return (
     <div className="min-h-screen bg-amber-50/40 text-stone-800 flex flex-col font-sans">
       {/* Top Header */}
-      <header className="bg-amber-900 text-amber-50 sticky top-0 z-40 shadow-md">
+      <header className="bg-amber-950 text-amber-50 sticky top-0 z-40 shadow-md">
         <div className="max-w-6xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-3 cursor-pointer" onClick={() => setActiveTab('store')}>
             <div className="w-10 h-10 rounded-full bg-amber-500 flex items-center justify-center text-amber-950 font-bold shadow-inner">
@@ -420,7 +487,7 @@ export default function App() {
                 Neha's Kitchen
                 <span className="text-xs bg-amber-600/80 px-2 py-0.5 rounded-full text-amber-100 font-normal">Kalyan</span>
               </h1>
-              <p className="text-xs text-amber-200">Homecrafted Flavors, Cooked with Love</p>
+              <p className="text-xs text-amber-200">घरगुती चव • Homecrafted with love</p>
             </div>
           </div>
 
@@ -447,14 +514,14 @@ export default function App() {
       {/* Main Content */}
       {activeTab === 'store' ? (
         <main className="flex-1 max-w-6xl w-full mx-auto px-4 py-6">
-          <div className="bg-gradient-to-r from-amber-700 to-amber-900 text-white rounded-2xl p-6 md:p-8 mb-8 shadow-lg flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <div className="bg-gradient-to-r from-amber-700 via-amber-800 to-rose-950 text-white rounded-2xl p-6 md:p-8 mb-6 shadow-lg flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div>
               <span className="inline-block bg-amber-500 text-amber-950 font-bold text-xs uppercase tracking-wider px-2.5 py-1 rounded-md mb-2">
-                Fresh & Authentic
+                ताजं • Fresh & Authentic
               </span>
-              <h2 className="text-2xl md:text-3xl font-extrabold mb-2">Authentic Homestyle Delicacies in Kalyan</h2>
+              <h2 className="text-2xl md:text-3xl font-extrabold mb-2">A little taste of Maharashtra, made at home</h2>
               <p className="text-amber-100 text-sm md:text-base max-w-xl">
-                Freshly prepared breakfast snacks, homemade Diwali Faral, and wholesome lunch & dinner thalis. Order online or customize your feast!
+                प्रेमाने बनवलेले पोहे, मिसळ, फराळ आणि घरगुती थाळी — freshly prepared in Kalyan, just like home.
               </p>
             </div>
             <div className="bg-white/10 backdrop-blur-md p-4 rounded-xl border border-white/20 text-xs space-y-1.5 w-full md:w-auto">
@@ -463,6 +530,124 @@ export default function App() {
               <div className="flex items-center gap-2"><Clock className="w-4 h-4 text-amber-300" /> Pre-order available for lunch & dinner</div>
             </div>
           </div>
+
+          <section aria-labelledby="swaad-title" className="relative isolate overflow-hidden rounded-3xl border border-amber-800/40 bg-gradient-to-br from-stone-950 via-amber-950 to-rose-950 p-5 text-white shadow-xl md:p-7 mb-10">
+            <div aria-hidden="true" className="pointer-events-none absolute -right-16 -top-20 h-56 w-56 rounded-full border-[24px] border-amber-300/10" />
+            <div aria-hidden="true" className="pointer-events-none absolute -bottom-28 left-1/3 h-56 w-56 rounded-full border-[24px] border-rose-300/10" />
+            <div className="relative grid gap-6 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
+              <div>
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-200/20 bg-white/10 px-3 py-1 text-[11px] font-semibold tracking-wide text-amber-100">
+                  <Sparkles className="h-3.5 w-3.5" /> AI SWAAD SAKHI · तुमची चव मैत्रीण
+                </span>
+                <h3 id="swaad-title" className="mt-4 text-2xl font-extrabold md:text-3xl">आज काय खायचं?</h3>
+                <p className="mt-2 max-w-md text-sm leading-relaxed text-amber-100/85">
+                  Tell our smart menu buddy what you’re craving. It’ll find a homestyle match for your mood, veg preference and budget.
+                </p>
+
+                <form onSubmit={event => event.preventDefault()} className="mt-5 space-y-3">
+                  <div className="flex flex-wrap gap-2">
+                    {[
+                      { id: 'breakfast', label: 'नाश्ता · Breakfast' },
+                      { id: 'thali', label: 'जेवण · Thali' },
+                      { id: 'faral', label: 'फराळ · Faral' },
+                      { id: 'surprise', label: 'Surprise me ✨' }
+                    ].map(option => (
+                      <button
+                        key={option.id}
+                        type="button"
+                        onClick={() => setSwaadMood(option.id)}
+                        aria-pressed={swaadMood === option.id}
+                        className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition ${
+                          swaadMood === option.id
+                            ? 'border-amber-300 bg-amber-300 text-amber-950'
+                            : 'border-white/20 bg-white/5 text-amber-50 hover:bg-white/10'
+                        }`}
+                      >
+                        {option.label}
+                      </button>
+                    ))}
+                  </div>
+
+                  <label className="flex items-center gap-2 rounded-xl border border-white/15 bg-white/10 px-3 py-2.5 focus-within:ring-2 focus-within:ring-amber-300">
+                    <Search className="h-4 w-4 shrink-0 text-amber-200" />
+                    <input
+                      type="search"
+                      value={swaadPrompt}
+                      onChange={event => setSwaadPrompt(event.target.value)}
+                      placeholder="Try “something spicy” or “vegetarian faral”"
+                      aria-label="Tell Swaad Sakhi what you are craving"
+                      className="min-w-0 flex-1 bg-transparent text-sm text-white outline-none placeholder:text-amber-100/55"
+                    />
+                  </label>
+
+                  <div className="flex flex-wrap items-center gap-3">
+                    <label className="flex items-center gap-2 rounded-lg border border-white/15 bg-white/5 px-3 py-2 text-xs text-amber-50">
+                      <span>Budget / item</span>
+                      <span aria-hidden="true">₹</span>
+                      <select
+                        value={swaadBudget}
+                        onChange={event => setSwaadBudget(event.target.value)}
+                        aria-label="Maximum budget per item"
+                        className="bg-transparent font-semibold text-white outline-none [&>option]:text-stone-900"
+                      >
+                        {[100, 200, 300, 500, 1000].map(amount => (
+                          <option key={amount} value={amount}>{amount}</option>
+                        ))}
+                      </select>
+                    </label>
+                    <label className="flex cursor-pointer items-center gap-2 text-xs text-amber-50">
+                      <input
+                        type="checkbox"
+                        checked={swaadVegOnly}
+                        onChange={event => setSwaadVegOnly(event.target.checked)}
+                        className="h-4 w-4 accent-amber-400"
+                      />
+                      फक्त शाकाहारी · Veg only
+                    </label>
+                  </div>
+                </form>
+                <p className="mt-3 text-[10px] text-amber-100/55">
+                  Smart menu matching runs on this device — no external AI service or personal data sharing.
+                </p>
+              </div>
+
+              <div className="rounded-2xl border border-white/15 bg-white/[0.07] p-4 backdrop-blur-sm md:p-5">
+                <div className="mb-3 flex items-center justify-between gap-3">
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-wider text-amber-200">Your homestyle shortlist</p>
+                    <p className="mt-1 text-[11px] text-white/60">
+                      {swaadBudgetMiss ? 'No items fit that budget yet — showing the closest picks.' : 'Picked from Neha’s kitchen menu'}
+                    </p>
+                  </div>
+                  <Sparkles className="h-5 w-5 shrink-0 text-amber-300" />
+                </div>
+                <div className="space-y-2">
+                  {swaadMatches.map((item, index) => (
+                    <div key={item.id} className="flex items-center gap-3 rounded-xl border border-white/10 bg-black/15 p-2.5">
+                      <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-amber-300/15 text-xs font-bold text-amber-200">
+                        0{index + 1}
+                      </span>
+                      {item.image && (
+                        <img src={item.image} alt="" className="h-12 w-12 shrink-0 rounded-lg object-cover" loading="lazy" />
+                      )}
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-sm font-bold text-white">{item.name}</p>
+                        <p className="text-[11px] text-amber-100/65">{item.category} · ₹{item.price}/{item.unit}</p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => addToCart(item)}
+                        aria-label={`Add ${item.name} to cart`}
+                        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-amber-400 text-amber-950 transition hover:bg-amber-300"
+                      >
+                        <Plus className="h-4 w-4" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </section>
 
           {/* Categorized Menu */}
           <div className="space-y-10">
@@ -473,7 +658,8 @@ export default function App() {
                   <div className="flex items-center justify-between border-b-2 border-amber-200 pb-2 mb-4">
                     <h3 className="text-xl md:text-2xl font-bold text-amber-950 flex items-center gap-2">
                       <Utensils className="w-5 h-5 text-amber-600" />
-                      {category === 'Diwali Snacks' ? 'Diwali Snacks (Faral)' : category}
+                      {category === 'Diwali Snacks' ? 'दिवाळी फराळ · Diwali Faral' :
+                        category === 'Snacks' ? 'नाश्ता · Snacks' : 'घरगुती जेवण · Lunch & Dinner'}
                     </h3>
                     <span className="text-xs text-amber-800 font-medium bg-amber-100 px-2 py-0.5 rounded-full">
                       {items.length} items
