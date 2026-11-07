@@ -163,7 +163,7 @@ export default function App() {
   });
 
   const [adminUser, setAdminUser] = useState(null);
-  const [authLoading, setAuthLoading] = useState(true);
+  const [authLoading, setAuthLoading] = useState(Boolean(auth));
   const [authError, setAuthError] = useState('');
   const [adminTab, setAdminTab] = useState('orders');
   const [selectedMonth, setSelectedMonth] = useState('2026-11');
@@ -185,10 +185,7 @@ export default function App() {
   }, [orders]);
 
   useEffect(() => {
-    if (!auth) {
-      setAuthLoading(false);
-      return undefined;
-    }
+    if (!auth) return undefined;
 
     return onAuthStateChanged(auth, (user) => {
       setAuthLoading(false);
