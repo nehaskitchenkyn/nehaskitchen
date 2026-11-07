@@ -1,16 +1,29 @@
-# React + Vite
+# Neha's Kitchen
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## Run locally
 
-Currently, two official plugins are available:
+```sh
+npm install
+cp .env.example .env.local
+npm run dev
+```
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Configure admin Google sign-in
 
-## React Compiler
+Admin access uses Firebase Authentication with Google as the sign-in provider. The app allows only `vishalmugutrao@gmail.com` and `nehamugutrao@gmail.com`; all other Google accounts are signed out.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+1. Create or select a Firebase project and register a web app.
+2. In Firebase Console, enable **Authentication → Sign-in method → Google**.
+3. Add the deployed site host (and `localhost` for local development) to **Authentication → Settings → Authorized domains**.
+4. Copy the web app's API key, auth domain, project ID, and app ID into `.env.local` using the variable names in `.env.example`.
+5. For GitHub Pages deployments, add repository Actions secrets named `VITE_FIREBASE_API_KEY`, `VITE_FIREBASE_AUTH_DOMAIN`, `VITE_FIREBASE_PROJECT_ID`, and `VITE_FIREBASE_APP_ID`. The deploy workflow passes these to the Vite build.
 
-## Expanding the ESLint configuration
+Without Firebase configuration, the storefront remains available but admin sign-in is disabled.
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+Admin orders are currently stored in each browser's local storage; Google sign-in does not sync orders between devices. If order data is moved to a backend, authorize these same accounts in backend security rules as well—client-side checks alone do not secure backend data.
+
+## Scripts
+
+- `npm run dev` — start the local development server
+- `npm run build` — create a production build
+- `npm run lint` — run ESLint

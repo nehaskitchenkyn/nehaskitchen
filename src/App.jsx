@@ -1,10 +1,12 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { 
   ShoppingBag, Calendar, CheckCircle2, Phone, Clock, Plus, 
   Trash2, ShieldCheck, TrendingUp, DollarSign, Package, 
   ChefHat, ChevronRight, FileSpreadsheet, Eye, Printer, 
-  MessageCircle, Sparkles, Filter, Search, Store, Utensils 
+  MessageCircle, Sparkles, Filter, Search, Store, Utensils, LogIn, LogOut
 } from 'lucide-react';
+import { onAuthStateChanged, signInWithPopup, signOut } from 'firebase/auth';
+import { ADMIN_EMAILS, auth, googleProvider, isFirebaseConfigured } from './firebase.js';
 
 // Custom inline Instagram icon component (replaces deprecated lucide export)
 const InstagramIcon = ({ className = "w-4 h-4 text-pink-300" }) => (
@@ -25,19 +27,19 @@ const InstagramIcon = ({ className = "w-4 h-4 text-pink-300" }) => (
 
 const MENU_DATA = [
   // Snacks
-  { id: 'snk-1', category: 'Snacks', name: 'Idli Chutney', price: 60, unit: 'per plate (2 pcs)', type: 'Veg', desc: 'Steaming hot, fluffy rice-lentil cakes served with freshly grated coconut chutney and aromatic sambar.', popular: true },
-  { id: 'snk-2', category: 'Snacks', name: 'Kande Pohe', price: 40, unit: 'per plate', type: 'Veg', desc: 'Traditional Maharashtrian flattened rice cooked with onions, mustard seeds, green chillies, peanuts, and lemon juice.', popular: true },
-  { id: 'snk-3', category: 'Snacks', name: 'Misal Pav', price: 80, unit: 'per plate (with 2 pav)', type: 'Veg', desc: 'Fiery sprouted moth bean gravy topped with crispy farsan, chopped onions, coriander, and fresh lemon with buttered pav.', popular: true },
-  { id: 'snk-4', category: 'Snacks', name: 'Upma', price: 40, unit: 'per plate', type: 'Veg', desc: 'Wholesome semolina tempered with mustard seeds, curry leaves, ginger, green chillies, and roasted cashews.' },
+  { id: 'snk-1', category: 'Snacks', name: 'Idli Chutney', price: 60, unit: 'per plate (2 pcs)', type: 'Veg', desc: 'Steaming hot, fluffy rice-lentil cakes served with freshly grated coconut chutney and aromatic sambar.', image: 'photo-1601050690597-df0568f70950', popular: true },
+  { id: 'snk-2', category: 'Snacks', name: 'Kande Pohe', price: 40, unit: 'per plate', type: 'Veg', desc: 'Traditional Maharashtrian flattened rice cooked with onions, mustard seeds, green chillies, peanuts, and lemon juice.', image: 'photo-1504674900247-0877df9cc836', popular: true },
+  { id: 'snk-3', category: 'Snacks', name: 'Misal Pav', price: 80, unit: 'per plate (with 2 pav)', type: 'Veg', desc: 'Fiery sprouted moth bean gravy topped with crispy farsan, chopped onions, coriander, and fresh lemon with buttered pav.', image: 'photo-1631452180519-c014fe946bc7', popular: true },
+  { id: 'snk-4', category: 'Snacks', name: 'Upma', price: 40, unit: 'per plate', type: 'Veg', desc: 'Wholesome semolina tempered with mustard seeds, curry leaves, ginger, green chillies, and roasted cashews.', image: 'photo-1547592180-85f173990554' },
 
   // Diwali Snacks (Faral)
-  { id: 'dwl-1', category: 'Diwali Snacks', name: 'Besan Ladoo', price: 300, unit: 'per 500g', type: 'Veg', desc: 'Pure ghee roasted gram flour delicately sweetened and infused with cardamom and crunchy dry fruits.', popular: true },
-  { id: 'dwl-2', category: 'Diwali Snacks', name: 'Rava Ladoo', price: 280, unit: 'per 500g', type: 'Veg', desc: 'Melt-in-mouth semolina and coconut ladoos prepared in pure cow ghee with golden raisins and cashew bits.' },
-  { id: 'dwl-3', category: 'Diwali Snacks', name: 'Chakali', price: 240, unit: 'per 500g', type: 'Veg', desc: 'Crispy, spiral savoury made from roasted multi-grain bhajani flour and aromatic spices.', popular: true },
-  { id: 'dwl-4', category: 'Diwali Snacks', name: 'Shankarpalli', price: 220, unit: 'per 500g', type: 'Veg', desc: 'Crispy, diamond-cut sweet festive bites fried to golden perfection in pure ghee.' },
-  { id: 'dwl-5', category: 'Diwali Snacks', name: 'Karanji', price: 320, unit: 'per 500g', type: 'Veg', desc: 'Flaky crescent pastries stuffed with roasted dry coconut, khoya, poppy seeds, and fragrant spices.', popular: true },
-  { id: 'dwl-6', category: 'Diwali Snacks', name: 'Chivada', price: 220, unit: 'per 500g', type: 'Veg', desc: 'Crisp roasted poha chivda lightly seasoned with mustard, turmeric, peanuts, curry leaves, and green chillies.' },
-  { id: 'dwl-7', category: 'Diwali Snacks', name: 'Tikhat Shev', price: 200, unit: 'per 500g', type: 'Veg', desc: 'Crunchy gram flour spicy sev infused with garlic, ajwain, and special home ground spices.' },
+  { id: 'dwl-1', category: 'Diwali Snacks', name: 'Besan Ladoo', price: 300, unit: 'per 500g', type: 'Veg', desc: 'Pure ghee roasted gram flour delicately sweetened and infused with cardamom and crunchy dry fruits.', image: 'photo-1504674900247-0877df9cc836', popular: true },
+  { id: 'dwl-2', category: 'Diwali Snacks', name: 'Rava Ladoo', price: 280, unit: 'per 500g', type: 'Veg', desc: 'Melt-in-mouth semolina and coconut ladoos prepared in pure cow ghee with golden raisins and cashew bits.', image: 'photo-1546069901-ba9599a7e63c' },
+  { id: 'dwl-3', category: 'Diwali Snacks', name: 'Chakali', price: 240, unit: 'per 500g', type: 'Veg', desc: 'Crispy, spiral savoury made from roasted multi-grain bhajani flour and aromatic spices.', image: 'photo-1601050690597-df0568f70950', popular: true },
+  { id: 'dwl-4', category: 'Diwali Snacks', name: 'Shankarpalli', price: 220, unit: 'per 500g', type: 'Veg', desc: 'Crispy, diamond-cut sweet festive bites fried to golden perfection in pure ghee.', image: 'photo-1504674900247-0877df9cc836' },
+  { id: 'dwl-5', category: 'Diwali Snacks', name: 'Karanji', price: 320, unit: 'per 500g', type: 'Veg', desc: 'Flaky crescent pastries stuffed with roasted dry coconut, khoya, poppy seeds, and fragrant spices.', image: 'photo-1601050690597-df0568f70950', popular: true },
+  { id: 'dwl-6', category: 'Diwali Snacks', name: 'Chivada', price: 220, unit: 'per 500g', type: 'Veg', desc: 'Crisp roasted poha chivda lightly seasoned with mustard, turmeric, peanuts, curry leaves, and green chillies.', image: 'photo-1547592180-85f173990554' },
+  { id: 'dwl-7', category: 'Diwali Snacks', name: 'Tikhat Shev', price: 200, unit: 'per 500g', type: 'Veg', desc: 'Crunchy gram flour spicy sev infused with garlic, ajwain, and special home ground spices.', image: 'photo-1547592180-85f173990554' },
 
   // Lunch & Dinner
   { 
@@ -48,6 +50,7 @@ const MENU_DATA = [
     unit: 'per thali', 
     type: 'Veg', 
     desc: 'Wholesome homestyle meal: Choice of 2 Roti or 1 Bhakri, Seasonal Bhaji, Steamed Rice, Homestyle Dal, Fresh Salad, and Crispy Papad.',
+    image: 'photo-1631452180519-c014fe946bc7',
     hasBreadChoice: true,
     popular: true
   },
@@ -59,6 +62,7 @@ const MENU_DATA = [
     unit: 'per thali', 
     type: 'Non-Veg', 
     desc: 'Hearty feast: Choice of 2 Roti or 1 Bhakri, Authentic Chicken Rassa (Tambda/Special Gravy), Steamed Rice, Fresh Salad, and Crispy Papad.',
+    image: 'photo-1603894584373-5ac82b2ae398',
     hasBreadChoice: true,
     popular: true
   },
@@ -69,7 +73,8 @@ const MENU_DATA = [
     price: 0, 
     unit: 'custom pricing', 
     type: 'Special', 
-    desc: 'Planning a party, bulk gathering, or special dish not on the regular menu? Submit your requirements and Neha will personally call back with custom pricing.' 
+    desc: 'Planning a party, bulk gathering, or special dish not on the regular menu? Submit your requirements and Neha will personally call back with custom pricing.',
+    image: 'photo-1504674900247-0877df9cc836'
   }
 ];
 
@@ -157,8 +162,9 @@ export default function App() {
     name: ''
   });
 
-  const [adminPin, setAdminPin] = useState('');
-  const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false);
+  const [adminUser, setAdminUser] = useState(null);
+  const [authLoading, setAuthLoading] = useState(true);
+  const [authError, setAuthError] = useState('');
   const [adminTab, setAdminTab] = useState('orders');
   const [selectedMonth, setSelectedMonth] = useState('2026-11');
   const [selectedKOTOrder, setSelectedKOTOrder] = useState(null);
@@ -177,6 +183,59 @@ export default function App() {
   useEffect(() => {
     localStorage.setItem('neha_kitchen_orders', JSON.stringify(orders));
   }, [orders]);
+
+  useEffect(() => {
+    if (!auth) {
+      setAuthLoading(false);
+      return undefined;
+    }
+
+    return onAuthStateChanged(auth, (user) => {
+      setAuthLoading(false);
+      if (!user) {
+        setAdminUser(null);
+        return;
+      }
+
+      const email = user.email?.toLowerCase();
+      if (email && ADMIN_EMAILS.includes(email)) {
+        setAdminUser(user);
+        setAuthError('');
+        return;
+      }
+
+      setAdminUser(null);
+      setAuthError('This Google account is not authorized to access the admin section.');
+      signOut(auth).catch((error) => {
+        setAuthError(`Could not end the unauthorized session: ${error.message}`);
+      });
+    });
+  }, []);
+
+  const handleAdminSignIn = async () => {
+    setAuthError('');
+    if (!auth) {
+      setAuthError('Google sign-in is not configured. Please contact the site administrator.');
+      return;
+    }
+
+    try {
+      const { user } = await signInWithPopup(auth, googleProvider);
+      if (!ADMIN_EMAILS.includes(user.email?.toLowerCase() ?? '')) {
+        await signOut(auth);
+        setAuthError('This Google account is not authorized to access the admin section.');
+      }
+    } catch (error) {
+      setAuthError(`Google sign-in failed: ${error.message}`);
+    }
+  };
+
+  const handleAdminSignOut = () => {
+    if (!auth) return;
+    signOut(auth).catch((error) => {
+      setAuthError(`Could not sign out: ${error.message}`);
+    });
+  };
 
   const addToCart = (item, breadPref = null) => {
     if (item.id === 'adhoc-order') {
@@ -429,6 +488,17 @@ export default function App() {
                     {items.map((item) => (
                       <div key={item.id} className="bg-white rounded-xl shadow-sm border border-amber-100 p-5 flex flex-col justify-between hover:shadow-md transition">
                         <div>
+                          <div className="relative -mx-5 -mt-5 mb-4 overflow-hidden rounded-t-xl bg-amber-100">
+                            <img
+                              src={`https://images.unsplash.com/${item.image}?auto=format&fit=crop&w=900&q=80`}
+                              alt={`${item.name} serving suggestion`}
+                              loading="lazy"
+                              className="h-48 w-full object-cover"
+                            />
+                            <span className="absolute bottom-2 right-2 rounded-full bg-stone-950/70 px-2.5 py-1 text-[10px] font-medium text-white">
+                              Serving suggestion
+                            </span>
+                          </div>
                           <div className="flex justify-between items-start gap-2 mb-1.5">
                             <h4 className="font-bold text-stone-900 text-base md:text-lg">{item.name}</h4>
                             <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
@@ -490,31 +560,33 @@ export default function App() {
       ) : (
         /* Admin Dashboard */
         <main className="flex-1 max-w-6xl w-full mx-auto px-4 py-6">
-          {!isAdminAuthenticated ? (
+          {!adminUser ? (
             <div className="max-w-md mx-auto bg-white p-6 md:p-8 rounded-2xl shadow-md border border-amber-200 text-center">
               <ShieldCheck className="w-12 h-12 text-amber-600 mx-auto mb-3" />
               <h2 className="text-xl font-bold text-stone-900 mb-1">Kitchen & Admin Portal</h2>
-              <p className="text-stone-500 text-xs mb-4">Enter 4-digit PIN to access live orders & sales reports</p>
-              <form onSubmit={(e) => {
-                e.preventDefault();
-                if (adminPin === '1234') {
-                  setIsAdminAuthenticated(true);
-                } else {
-                  alert('Incorrect PIN. Default is 1234');
-                }
-              }}>
-                <input
-                  type="password"
-                  maxLength={4}
-                  placeholder="Enter PIN (Default: 1234)"
-                  value={adminPin}
-                  onChange={(e) => setAdminPin(e.target.value)}
-                  className="w-full text-center tracking-widest text-lg font-bold p-3 border border-stone-300 rounded-lg mb-4 focus:ring-2 focus:ring-amber-500 outline-none"
-                />
-                <button type="submit" className="w-full bg-amber-700 hover:bg-amber-800 text-white font-semibold py-2.5 rounded-lg transition">
-                  Unlock Kitchen Dashboard
-                </button>
-              </form>
+              <p className="text-stone-500 text-xs mb-4">
+                Sign in with an authorized Google account to access live orders and sales reports.
+              </p>
+              {authError && (
+                <p role="alert" className="mb-4 rounded-lg bg-rose-50 p-3 text-left text-xs text-rose-800">
+                  {authError}
+                </p>
+              )}
+              {!isFirebaseConfigured && (
+                <p role="alert" className="mb-4 rounded-lg bg-amber-50 p-3 text-left text-xs text-amber-900">
+                  Admin sign-in is not configured yet. Add the Firebase settings described in the project README.
+                </p>
+              )}
+              <button
+                type="button"
+                onClick={handleAdminSignIn}
+                disabled={!isFirebaseConfigured || authLoading}
+                className="w-full bg-amber-700 hover:bg-amber-800 disabled:cursor-not-allowed disabled:opacity-50 text-white font-semibold py-2.5 rounded-lg transition flex items-center justify-center gap-2"
+              >
+                <LogIn className="w-4 h-4" />
+                {authLoading ? 'Checking sign-in…' : 'Continue with Google'}
+              </button>
+              {authLoading && <p className="mt-3 text-xs text-stone-500">Checking your Google session…</p>}
             </div>
           ) : (
             <div className="space-y-6">
@@ -539,10 +611,10 @@ export default function App() {
                   ))}
                 </div>
                 <button
-                  onClick={() => setIsAdminAuthenticated(false)}
+                  onClick={handleAdminSignOut}
                   className="text-xs text-rose-600 hover:underline"
                 >
-                  Lock Dashboard
+                  <span className="inline-flex items-center gap-1"><LogOut className="w-3.5 h-3.5" /> Sign out</span>
                 </button>
               </div>
 
